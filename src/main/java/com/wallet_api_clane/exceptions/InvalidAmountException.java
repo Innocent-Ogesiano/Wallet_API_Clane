@@ -1,13 +1,11 @@
 package com.wallet_api_clane.exceptions;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
+@ResponseStatus(HttpStatus.BAD_REQUEST)
 public class InvalidAmountException extends Exception {
-    String message;
-    HttpStatus status;
-
-    public InvalidAmountException(String message, HttpStatus status) {
+    public InvalidAmountException(String message) {
         super(message);
-        this.status = status;
     }
 }

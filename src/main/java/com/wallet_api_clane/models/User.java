@@ -20,13 +20,15 @@ public class User extends BaseModel {
     private String phoneNumber;
     @Column(nullable = false)
     private String password;
-    private boolean isAccountVerified;
-    @Column(nullable = false)
+    private boolean isAccountVerified = false;
     private String firstName;
-    @Column(nullable = false)
     private String lastName;
     @Column(nullable = false, unique = true)
     private String accountNumber;
+    private String bvn;
+    private String nin;
+    @OneToOne
+    private Address address;
     @Enumerated(EnumType.STRING)
     private KYCLevel kycLevel = KYCLevel.LEVEL_1;
     @Enumerated(EnumType.STRING)
