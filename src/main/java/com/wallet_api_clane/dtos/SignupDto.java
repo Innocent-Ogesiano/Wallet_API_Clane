@@ -17,8 +17,4 @@ public class SignupDto {
     private String phoneNumber;
     @NotBlank
     private String password;
-    @NotBlank
-    private String firstName;
-    @NotBlank
-    private String lastName;
 }

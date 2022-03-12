@@ -1,4 +1,4 @@
-package com.wallet_api_clane.dtos;
+package com.wallet_api_clane.response;
 
 public record AuthResponseDto(String token) {
 }

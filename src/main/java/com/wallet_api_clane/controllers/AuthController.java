@@ -1,11 +1,11 @@
 package com.wallet_api_clane.controllers;
 
-import com.wallet_api_clane.utils.JwtTokenUtil;
-import com.wallet_api_clane.dtos.AuthResponseDto;
 import com.wallet_api_clane.dtos.LoginDto;
 import com.wallet_api_clane.dtos.SignupDto;
+import com.wallet_api_clane.response.AuthResponseDto;
 import com.wallet_api_clane.services.AuthServices;
 import com.wallet_api_clane.services.serviceImpl.JwtUserDetailsServiceImpl;
+import com.wallet_api_clane.utils.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
 import javax.validation.Valid;
-import java.io.IOException;
 
 import static org.springframework.http.HttpStatus.OK;
 
@@ -49,7 +48,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/login")
-    public ResponseEntity<AuthResponseDto> createAuthenticationToken(@RequestBody LoginDto loginDto) throws IOException {
+    public ResponseEntity<AuthResponseDto> createAuthenticationToken(@RequestBody LoginDto loginDto) {
         authenticateUser(loginDto, authenticationManager);
         return generateJWTToken(loginDto);
     }
