@@ -1,4 +1,4 @@
-package com.wallet_api_clane.utils;
+package com.wallet_api_clane.utils.passwordValidation;
 
 import com.wallet_api_clane.annotations.PasswordValueMatch;
 import org.springframework.beans.BeanWrapperImpl;

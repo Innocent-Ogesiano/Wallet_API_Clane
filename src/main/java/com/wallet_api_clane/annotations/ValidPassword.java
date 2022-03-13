@@ -1,6 +1,6 @@
 package com.wallet_api_clane.annotations;
 
-import com.wallet_api_clane.utils.PasswordConstraintValidator;
+import com.wallet_api_clane.utils.passwordValidation.PasswordConstraintValidator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
