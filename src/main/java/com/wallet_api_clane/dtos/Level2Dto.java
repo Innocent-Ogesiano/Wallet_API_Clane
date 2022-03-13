@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.Pattern;
 
 @Getter
 @Setter
@@ -14,6 +14,6 @@ public class Level2Dto {
     @NotBlank
     private String lastName;
     @NotBlank
-    @Size(min = 11, max = 11)
+    @Pattern(regexp = "^\\d{11}$", message = "Enter a valid BVN")
     private String bvn;
 }
