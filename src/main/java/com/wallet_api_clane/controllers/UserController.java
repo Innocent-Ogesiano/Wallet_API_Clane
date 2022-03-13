@@ -3,6 +3,7 @@ package com.wallet_api_clane.controllers;
 import com.wallet_api_clane.dtos.Level2Dto;
 import com.wallet_api_clane.dtos.Level3Dto;
 import com.wallet_api_clane.dtos.TransferDto;
+import com.wallet_api_clane.dtos.WithdrawalDto;
 import com.wallet_api_clane.exceptions.InvalidAmountException;
 import com.wallet_api_clane.services.UserServices;
 import lombok.RequiredArgsConstructor;
@@ -49,5 +50,11 @@ public class UserController {
     public ResponseEntity<String> transferToBeneficiary(@Valid @RequestBody TransferDto transferDto) throws InvalidAmountException, InvalidTransactionException, InsufficientResourcesException {
         userServices.transferMoneyToAnotherUser(transferDto);
         return new ResponseEntity<>("Transfer Successful", HttpStatus.OK);
+    }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<String> withdrawFromWallet(@Valid @RequestBody WithdrawalDto withdrawalDto) throws InsufficientResourcesException, InvalidAmountException {
+        userServices.withdrawFromWallet(withdrawalDto);
+        return new ResponseEntity<>("Withdrawal Successful", HttpStatus.OK);
     }
 }
