@@ -99,40 +99,52 @@ public class UserServiceImpl implements UserServices {
     @Override
     public void transferMoneyToAnotherUser(TransferDto transferDto) throws InvalidAmountException, InvalidTransactionException, InsufficientResourcesException {
         User user = userUtil.getUserWithEmail(getAuthenticatedUser());
+        if (isTransferValidated(transferDto, user))
+            transferToBeneficiary(transferDto, user);
+    }
+
+    private boolean isTransferValidated(TransferDto transferDto, User user)
+            throws InsufficientResourcesException, InvalidAmountException
+    {
         double walletBalance = user.getWallet().getWalletBalance();
         double transferAmount = transferDto.getAmount();
-        double transactionLimit = userUtil.getTransactionLimit(user);
-        double transactionAmount = transactionServices.checkTotalTransactionsForTheDay(user) + transferAmount;
-        if (!(transferAmount > 0) || !(walletBalance >= transferAmount) || !(transactionAmount <= transactionLimit)) {
-            if (walletBalance < transferAmount) {
-                log.error(INSUFFICIENT_BALANCE);
-                throw new InsufficientResourcesException(INSUFFICIENT_BALANCE);
-            }
-            else if (transactionAmount > transactionLimit) {
-                log.error(LIMIT_REACHED);
-                throw new TransactionLimitException(LIMIT_REACHED);
-            }
-            else {
-                log.error(INVALID_AMOUNT);
-                throw new InvalidAmountException(INVALID_AMOUNT);
-            }
-        } else {
-            transferToBeneficiary(transferDto, user);
+        double dailyTransactionLimit = userUtil.getTransactionLimit(user);
+        double totalTransactionForTheDay =
+                transactionServices.checkTotalTransactionsForTheDay(user) + transferAmount;
+        if (transferAmount > 0 && walletBalance >= transferAmount
+                && totalTransactionForTheDay <= dailyTransactionLimit) {
+            return true;
+        }
+        if (walletBalance < transferAmount) {
+            log.error(INSUFFICIENT_BALANCE);
+            throw new InsufficientResourcesException(INSUFFICIENT_BALANCE);
+        }
+        else if (totalTransactionForTheDay > dailyTransactionLimit) {
+            log.error(LIMIT_REACHED);
+            throw new TransactionLimitException(LIMIT_REACHED);
+        }
+        else {
+            log.error(INVALID_AMOUNT);
+            throw new InvalidAmountException(INVALID_AMOUNT);
         }
     }
 
-    private void transferToBeneficiary(TransferDto transferDto, User user) throws InvalidAmountException, InvalidTransactionException {
-        User beneficiary = userRepository.findUserByEmailOrAccountNumber(transferDto.getBeneficiaryEmailOrAccountNumber())
+    private void transferToBeneficiary(TransferDto transferDto, User user)
+            throws InvalidAmountException, InvalidTransactionException
+    {
+        User beneficiary = userRepository
+                .findUserByEmailOrAccountNumber(transferDto.getBeneficiaryEmailOrAccountNumber())
                 .orElseThrow(()-> new UserWithEmailNotFound(USER_NOT_FOUND));
+
         TransactionDto transactionDto = creditBeneficiary(transferDto, user, beneficiary);
         if (transactionDto.getStatus().equals(DECLINED)) {
-            transactionServices.saveNewTransaction(transactionDto);
             throw new TransactionDeclinedException("Transaction not successful");
         }
-        transactionServices.saveNewTransaction(transactionDto);
     }
 
-    private TransactionDto creditBeneficiary(TransferDto transferDto, User user, User beneficiary) throws InvalidAmountException, InvalidTransactionException {
+    private TransactionDto creditBeneficiary(TransferDto transferDto, User user, User beneficiary)
+            throws InvalidAmountException, InvalidTransactionException
+    {
         boolean status = walletServices.topUpWallet(transferDto.getAmount(), beneficiary);
         TransactionDto transactionDto;
         double transferAmount = transferDto.getAmount();
@@ -144,28 +156,35 @@ public class UserServiceImpl implements UserServices {
             transactionDto = new TransactionDto(user, transferAmount, TRANSFER, APPROVED);
         } else
             transactionDto = new TransactionDto(user, transferAmount, TRANSFER, DECLINED);
+        transactionServices.saveNewTransaction(transactionDto);
         return transactionDto;
     }
 
     @Override
-    public void withdrawFromWallet(WithdrawalDto withdrawalDto) throws InvalidAmountException, InsufficientResourcesException {
+    public void withdrawFromWallet(WithdrawalDto withdrawalDto)
+            throws InvalidAmountException, InsufficientResourcesException
+    {
         User user = userUtil.getUserWithEmail(getAuthenticatedUser());
+        if (isWithdrawalValidated(withdrawalDto, user))
+            walletServices.withdrawFromWallet(withdrawalDto.getWithdrawalAmount(), user);
+    }
+
+    private boolean isWithdrawalValidated(WithdrawalDto withdrawalDto, User user) throws InvalidAmountException, InsufficientResourcesException {
         double walletBalance = user.getWallet().getWalletBalance();
         double withdrawalAmount = withdrawalDto.getWithdrawalAmount();
         double transactionLimit = userUtil.getTransactionLimit(user);
         double transactionAmount = transactionServices.checkTotalTransactionsForTheDay(user) + withdrawalDto.getWithdrawalAmount();
-        if (!(withdrawalAmount > 0) || !(walletBalance >= withdrawalAmount) || !(transactionAmount <= transactionLimit)) {
-            TransactionDto transactionDto =
-                    new TransactionDto(user, withdrawalAmount, WITHDRAWAL, DECLINED);
-            transactionServices.saveNewTransaction(transactionDto);
-            if (withdrawalAmount <= 0)
-                throw new InvalidAmountException(INVALID_AMOUNT);
-            else if (walletBalance < withdrawalAmount)
-                throw new InsufficientResourcesException(INSUFFICIENT_BALANCE);
-            else
-                throw new TransactionLimitException(LIMIT_REACHED);
+        if (withdrawalAmount > 0 && walletBalance >= withdrawalAmount && transactionAmount <= transactionLimit) {
+            return true;
         }
+        TransactionDto transactionDto =
+                new TransactionDto(user, withdrawalAmount, WITHDRAWAL, DECLINED);
+        transactionServices.saveNewTransaction(transactionDto);
+        if (withdrawalAmount <= 0)
+            throw new InvalidAmountException(INVALID_AMOUNT);
+        else if (walletBalance < withdrawalAmount)
+            throw new InsufficientResourcesException(INSUFFICIENT_BALANCE);
         else
-            walletServices.withdrawFromWallet(withdrawalAmount, user);
+            throw new TransactionLimitException(LIMIT_REACHED);
     }
 }

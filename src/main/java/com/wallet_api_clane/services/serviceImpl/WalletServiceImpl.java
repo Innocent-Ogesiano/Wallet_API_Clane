@@ -37,18 +37,18 @@ public class WalletServiceImpl implements WalletServices {
     public boolean topUpWallet(double amount, User user) throws InvalidAmountException {
         if (amount > 0) {
             double balanceLimit = userUtil.getBalanceLimit(user);
-            Wallet wallet = setUserWalletBalance(amount, user, balanceLimit);
+            Wallet wallet = checkUserBalanceLimit(amount, user, balanceLimit);
             if (wallet != null) {
                 user.setWallet(wallet);
                 userRepository.save(user);
                 return true;
             } else
                 return false;
-        } else
-            throw new InvalidAmountException(INVALID_AMOUNT);
+        }
+        throw new InvalidAmountException(INVALID_AMOUNT);
     }
 
-    private Wallet setUserWalletBalance(double amount, User user, double balanceLimit) {
+    private Wallet checkUserBalanceLimit(double amount, User user, double balanceLimit) {
         double userBalance = user.getWallet().getWalletBalance() + amount;
         if (userBalance <= balanceLimit) {
             return setWallet(amount, user);
