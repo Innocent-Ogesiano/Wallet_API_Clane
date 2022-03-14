@@ -44,8 +44,8 @@ class AuthServiceImplTest {
     @Test
     void registerNewUser() throws MessagingException {
         SignupDto signupDto = new SignupDto();
-        signupDto.setEmail("email");
-        signupDto.setPhoneNumber("phone");
+        signupDto.setEmail(anyString());
+        signupDto.setPhoneNumber(anyString());
         authService.registerNewUser(signupDto);
         verify(userRepository, times(1))
                 .findUserByEmailOrPhoneNumber(signupDto.getEmail(), signupDto.getPhoneNumber());
@@ -55,9 +55,9 @@ class AuthServiceImplTest {
     @Test
     void givenExistingEmail_shouldThrow_ResourceAlreadyExistException() {
         SignupDto signupDto = new SignupDto();
-        signupDto.setEmail("email");
-        signupDto.setPhoneNumber("phone");
-        when(userRepository.findUserByEmailOrPhoneNumber("email", "phone")).thenReturn(Optional.of(user));
+        signupDto.setEmail("any email");
+        signupDto.setPhoneNumber("any phone number");
+        when(userRepository.findUserByEmailOrPhoneNumber("any email", "any phone number")).thenReturn(Optional.of(user));
         assertThrows(ResourceAlreadyExistException.class,
                 ()-> authService.registerNewUser(signupDto));
     }
@@ -67,7 +67,7 @@ class AuthServiceImplTest {
         String email = "og@gmail.com";
         when(jwtTokenUtil.getUserEmailFromToken(anyString())).thenReturn(email);
         when(userUtil.getUserWithEmail(email)).thenReturn(user);
-        authService.verifyAccount("token");
+        authService.verifyAccount(anyString());
         assertTrue(user.isAccountVerified());
         verify(userRepository, times(1)).save(any(User.class));
     }

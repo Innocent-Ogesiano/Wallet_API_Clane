@@ -10,6 +10,6 @@ import javax.validation.constraints.NotBlank;
 @Builder
 public class Level3Dto {
     private AddressDto address;
-    @NotBlank(message = "BVN required")
+    @NotBlank(message = "NIN required")
     private String nin;
 }

@@ -99,11 +99,11 @@ public class UserServiceImpl implements UserServices {
     @Override
     public void transferMoneyToAnotherUser(TransferDto transferDto) throws InvalidAmountException, InvalidTransactionException, InsufficientResourcesException {
         User user = userUtil.getUserWithEmail(getAuthenticatedUser());
-        if (isTransferValidated(transferDto, user))
-            transferToBeneficiary(transferDto, user);
+        if (isTransferValid(transferDto, user))
+            confirmBeneficiary(transferDto, user);
     }
 
-    private boolean isTransferValidated(TransferDto transferDto, User user)
+    private boolean isTransferValid(TransferDto transferDto, User user)
             throws InsufficientResourcesException, InvalidAmountException
     {
         double walletBalance = user.getWallet().getWalletBalance();
@@ -129,7 +129,7 @@ public class UserServiceImpl implements UserServices {
         }
     }
 
-    private void transferToBeneficiary(TransferDto transferDto, User user)
+    private void confirmBeneficiary(TransferDto transferDto, User user)
             throws InvalidAmountException, InvalidTransactionException
     {
         User beneficiary = userRepository
@@ -149,14 +149,20 @@ public class UserServiceImpl implements UserServices {
         TransactionDto transactionDto;
         double transferAmount = transferDto.getAmount();
         if (status) {
-            double walletBalance = user.getWallet().getWalletBalance();
-            walletBalance = walletBalance - transferAmount;
-            user.getWallet().setWalletBalance(walletBalance);
-            userRepository.save(user);
-            transactionDto = new TransactionDto(user, transferAmount, TRANSFER, APPROVED);
+            transactionDto = deductTransferAmountFromUserWallet(user, transferAmount);
         } else
             transactionDto = new TransactionDto(user, transferAmount, TRANSFER, DECLINED);
         transactionServices.saveNewTransaction(transactionDto);
+        return transactionDto;
+    }
+
+    private TransactionDto deductTransferAmountFromUserWallet(User user, double transferAmount) {
+        TransactionDto transactionDto;
+        double walletBalance = user.getWallet().getWalletBalance();
+        walletBalance = walletBalance - transferAmount;
+        user.getWallet().setWalletBalance(walletBalance);
+        userRepository.save(user);
+        transactionDto = new TransactionDto(user, transferAmount, TRANSFER, APPROVED);
         return transactionDto;
     }
 
@@ -165,11 +171,11 @@ public class UserServiceImpl implements UserServices {
             throws InvalidAmountException, InsufficientResourcesException
     {
         User user = userUtil.getUserWithEmail(getAuthenticatedUser());
-        if (isWithdrawalValidated(withdrawalDto, user))
+        if (isWithdrawalValid(withdrawalDto, user))
             walletServices.withdrawFromWallet(withdrawalDto.getWithdrawalAmount(), user);
     }
 
-    private boolean isWithdrawalValidated(WithdrawalDto withdrawalDto, User user) throws InvalidAmountException, InsufficientResourcesException {
+    private boolean isWithdrawalValid(WithdrawalDto withdrawalDto, User user) throws InvalidAmountException, InsufficientResourcesException {
         double walletBalance = user.getWallet().getWalletBalance();
         double withdrawalAmount = withdrawalDto.getWithdrawalAmount();
         double transactionLimit = userUtil.getTransactionLimit(user);
