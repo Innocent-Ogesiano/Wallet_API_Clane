@@ -34,11 +34,10 @@ public class TransactionServiceImpl implements TransactionServices {
         LocalDateTime localDateTime = LocalDate.now().atStartOfDay();
         List<Transaction> transactionList =
                 transactionRepository.findTransactionsByUserAndCreatedAtIsAfterAndStatus(user, localDateTime, APPROVED);
-        double transactionAmount = 0;
-        for (Transaction transaction : transactionList) {
-            if (transaction.getType().equals(TRANSFER) || transaction.getType().equals(WITHDRAWAL))
-                transactionAmount += transaction.getAmount();
-        }
-        return transactionAmount;
+
+        return transactionList.stream()
+                .filter(transaction -> transaction.getType().equals(TRANSFER)
+                        || transaction.getType().equals(WITHDRAWAL))
+                .mapToDouble(Transaction::getAmount).sum();
     }
 }

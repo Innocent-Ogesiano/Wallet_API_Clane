@@ -2,9 +2,7 @@ package com.wallet_api_clane.services.serviceImpl;
 
 import com.wallet_api_clane.dtos.*;
 import com.wallet_api_clane.exceptions.*;
-import com.wallet_api_clane.global_constants.Constants;
 import com.wallet_api_clane.models.Address;
-import com.wallet_api_clane.models.MyUserDetails;
 import com.wallet_api_clane.models.User;
 import com.wallet_api_clane.repositories.AddressRepository;
 import com.wallet_api_clane.repositories.UserRepository;
@@ -12,12 +10,10 @@ import com.wallet_api_clane.services.MailService;
 import com.wallet_api_clane.services.TransactionServices;
 import com.wallet_api_clane.services.UserServices;
 import com.wallet_api_clane.services.WalletServices;
-import com.wallet_api_clane.utils.JwtTokenUtil;
 import com.wallet_api_clane.utils.ResourceClass;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +38,6 @@ public class UserServiceImpl implements UserServices {
     private final WalletServices walletServices;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
-    private final JwtTokenUtil jwtTokenUtil;
     private final ResourceClass resourceClass;
     private final AddressRepository addressRepository;
     private final TransactionServices transactionServices;
@@ -55,20 +50,7 @@ public class UserServiceImpl implements UserServices {
 
         walletServices.setNewUserWallet(newUser);
         userRepository.save(newUser);
-        sendVerificationMail(newUser);
-    }
-
-    private void sendVerificationMail(User user) throws MessagingException {
-        UserDetails userDetails = new MyUserDetails(user);
-        String token = jwtTokenUtil.generateToken(userDetails);
-        String content = "Thank you for signing up to the platform, " +
-                "kindly click on the link below to activate your account : \n" +
-                Constants.BASE_URL + "api/auth/account-verification/" + token;
-        MailDto mailDto = new MailDto();
-        mailDto.setBody(content);
-        mailDto.setSubject("Account Verification");
-        mailDto.setTo(user.getEmail());
-        mailService.sendMail(mailDto);
+        mailService.sendVerificationMail(newUser);
     }
 
     @Override
@@ -76,7 +58,8 @@ public class UserServiceImpl implements UserServices {
         String email = getAuthenticatedUser();
         User user = resourceClass.getUserWithEmail(email);
         boolean status = walletServices.topUpWallet(amount, user);
-        if (!status) throw new InvalidTransactionException("Invalid transaction, kindly upgrade your account");
+        if (!status)
+            throw new InvalidTransactionException("Invalid transaction, kindly upgrade your account");
     }
 
     @Override
@@ -121,12 +104,18 @@ public class UserServiceImpl implements UserServices {
         double transactionLimit = resourceClass.getTransactionLimit(user);
         double transactionAmount = transactionServices.checkTransactionsForTheDay(user) + transferAmount;
         if (!(transferAmount > 0) || !(walletBalance >= transferAmount) || !(transactionAmount <= transactionLimit)) {
-            if (walletBalance < transferAmount)
-                throw new InsufficientResourcesException("Insufficient balance");
-            else if (transactionAmount > transactionLimit)
-                throw new TransactionLimitException("Transaction limit reached");
-            else
+            if (walletBalance < transferAmount) {
+                log.error(INSUFFICIENT_BALANCE);
+                throw new InsufficientResourcesException(INSUFFICIENT_BALANCE);
+            }
+            else if (transactionAmount > transactionLimit) {
+                log.error(LIMIT_REACHED);
+                throw new TransactionLimitException(LIMIT_REACHED);
+            }
+            else {
+                log.error(INVALID_AMOUNT);
                 throw new InvalidAmountException(INVALID_AMOUNT);
+            }
         } else {
             transferToBeneficiary(transferDto, user);
         }
@@ -172,12 +161,11 @@ public class UserServiceImpl implements UserServices {
             if (withdrawalAmount <= 0)
                 throw new InvalidAmountException(INVALID_AMOUNT);
             else if (walletBalance < withdrawalAmount)
-                throw new InsufficientResourcesException("Insufficient balance");
+                throw new InsufficientResourcesException(INSUFFICIENT_BALANCE);
             else
-                throw new TransactionLimitException("Transaction limit reached");
+                throw new TransactionLimitException(LIMIT_REACHED);
         }
         else
             walletServices.withdrawFromWallet(withdrawalAmount, user);
-
     }
 }

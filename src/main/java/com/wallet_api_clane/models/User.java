@@ -2,14 +2,16 @@ package com.wallet_api_clane.models;
 
 import com.wallet_api_clane.enums.KYCLevel;
 import com.wallet_api_clane.enums.Role;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "user_table")
 public class User extends BaseModel {

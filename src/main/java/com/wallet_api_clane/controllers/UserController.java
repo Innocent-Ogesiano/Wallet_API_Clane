@@ -34,13 +34,13 @@ public class UserController {
         return new ResponseEntity<>(userServices.checkBalance(), HttpStatus.OK);
     }
 
-    @PutMapping("/upgrade/level-2")
+    @PutMapping("/account/upgrade/level-2")
     public ResponseEntity<String> upgradeToLevel2(@Valid @RequestBody Level2Dto level2Dto) {
         userServices.upgradeToLevel2(level2Dto);
         return new ResponseEntity<>("Successfully upgraded to level 2", HttpStatus.OK);
     }
 
-    @PutMapping("/upgrade/level-3")
+    @PutMapping("/account/upgrade/level-3")
     public ResponseEntity<String> upgradeToLevel3(@Valid @RequestBody Level3Dto level3Dto) {
         userServices.upgradeToLevel3(level3Dto);
         return new ResponseEntity<>("Successfully upgraded to level 3", HttpStatus.OK);

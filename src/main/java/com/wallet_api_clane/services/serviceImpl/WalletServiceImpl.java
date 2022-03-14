@@ -40,7 +40,8 @@ public class WalletServiceImpl implements WalletServices {
             Wallet wallet = setUserWalletBalance(amount, user, balanceLimit);
             if (wallet != null)
                 user.setWallet(wallet);
-            else return false;
+            else
+                return false;
             userRepository.save(user);
             return true;
         } else

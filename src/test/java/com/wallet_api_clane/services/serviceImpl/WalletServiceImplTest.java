@@ -14,8 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.transaction.InvalidTransactionException;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -37,24 +35,15 @@ class WalletServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        user = new User();
-        user.setEmail("og@gmail.com");
-        user.setWallet(new Wallet(0));
-
-//        SecurityContext securityContext = mock(SecurityContext.class);
-//        Authentication authentication = mock(Authentication.class);
-//        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-//        UserDetails userDetails = withUsername("og@gmail.com").password("password").roles("USER").build();
-//        when(authentication.getPrincipal()).thenReturn(userDetails);
-//        SecurityContextHolder.setContext(securityContext);
-//        when((UserDetails) SecurityContextHolder.getContext().getAuthentication()
-//                .getPrincipal()).thenReturn(userDetails);
-//
-//        when(resourceClass.getUserWithEmail("og@gmail.com")).thenReturn(user);
+        user = User
+                .builder()
+                .email("og@gmail.com")
+                .wallet(new Wallet(0))
+                .build();
     }
 
     @Test
-    void topUpWallet() throws InvalidAmountException, InvalidTransactionException {
+    void topUpWallet() throws InvalidAmountException {
         when(resourceClass.getBalanceLimit(user)).thenReturn(50000.00);
         walletService.topUpWallet(20000, user);
         assertEquals(20000, user.getWallet().getWalletBalance());

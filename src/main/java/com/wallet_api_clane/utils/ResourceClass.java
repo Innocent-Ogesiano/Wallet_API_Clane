@@ -6,6 +6,7 @@ import com.wallet_api_clane.repositories.UserRepository;
 import com.wallet_api_clane.response.HttpResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,14 +22,19 @@ public class ResourceClass {
     private final UserRepository userRepository;
 
     public static String getAuthenticatedUser() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal();
+        UserDetails userDetails = (UserDetails)
+                SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
         return userDetails.getUsername();
     }
 
+    @Cacheable(cacheNames = "logged-in-user")
     public User getUserWithEmail (String email) {
-        return userRepository.findUserByEmail(email).orElseThrow(()->
-                new UserWithEmailNotFound(USER_NOT_FOUND));
+        return userRepository
+                .findUserByEmail(email)
+                .orElseThrow(()-> new UserWithEmailNotFound(USER_NOT_FOUND));
     }
 
     public double getTransactionLimit(User user) {

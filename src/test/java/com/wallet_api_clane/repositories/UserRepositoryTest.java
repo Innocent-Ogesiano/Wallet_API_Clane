@@ -21,14 +21,16 @@ class UserRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        user = new User();
-        user.setPassword("password");
-        user.setAccountVerified(true);
-        user.setEmail("email@email");
-        user.setFirstName("first name");
-        user.setLastName("last name");
-        user.setPhoneNumber("phonenumber");
-        user.setAccountNumber("accountNumber");
+        user = User
+                .builder()
+                .password("password")
+                .isAccountVerified(true)
+                .email("email@email")
+                .firstName("first name")
+                .lastName("last name")
+                .phoneNumber("phonenumber")
+                .accountNumber("accountNumber")
+                .build();
     }
 
     @Test

@@ -8,6 +8,8 @@ public class Constants {
     public static final String RESOURCE_ALREADY_EXIST = " already exist";
     public static final String INVALID_AMOUNT = "Invalid Amount, kindly enter a valid amount";
     public static final String ALREADY_UPGRADED = "Already upgraded to ";
+    public static final String INSUFFICIENT_BALANCE = "Insufficient balance";
+    public static final String LIMIT_REACHED = "Transaction limit reached";
 
     private Constants() {
     }

@@ -45,7 +45,7 @@ class AuthServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        user = new User();
+        user = User.builder().build();
         wallet = new Wallet(0);
     }
 

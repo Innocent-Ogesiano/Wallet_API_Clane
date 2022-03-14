@@ -6,6 +6,7 @@ import com.wallet_api_clane.response.AuthResponseDto;
 import com.wallet_api_clane.services.AuthServices;
 import com.wallet_api_clane.services.serviceImpl.JwtUserDetailsServiceImpl;
 import com.wallet_api_clane.utils.JwtTokenUtil;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,11 @@ public class AuthController {
     private final JwtTokenUtil jwtTokenUtil;
     private final JwtUserDetailsServiceImpl userDetailsService;
 
+    @ApiOperation("""
+            Register new User with valid email and phone number.
+            Passwords must contain at least 8 characters.
+            Passwords must contain at least one uppercase character,\040
+            one lowercase character, one special character, and one number.""")
     @PostMapping("/signup")
     public ResponseEntity<String> registerNewUser(@Valid @RequestBody SignupDto signupDto) throws MessagingException {
         authServices.registerNewUser(signupDto);
@@ -58,12 +64,11 @@ public class AuthController {
         try {
             authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken
                     (loginDto.getEmail(), loginDto.getPassword()));
-        } catch (DisabledException e) {
-            throw new DisabledException("USER_DISABLED", e);
-        } catch (BadCredentialsException e) {
-            throw new BadCredentialsException("INVALID_CREDENTIALS", e);
+            SecurityContextHolder.getContext().setAuthentication(authenticate);
+        } catch (DisabledException | BadCredentialsException e) {
+            log.error(e.getMessage());
         }
-        SecurityContextHolder.getContext().setAuthentication(authenticate);
+
     }
 
     private ResponseEntity<AuthResponseDto> generateJWTToken(LoginDto loginDto) {

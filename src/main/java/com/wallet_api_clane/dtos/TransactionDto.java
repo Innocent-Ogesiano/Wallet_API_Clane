@@ -5,11 +5,13 @@ import com.wallet_api_clane.enums.TransactionType;
 import com.wallet_api_clane.models.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class TransactionDto {
     private User user;
     private double amount;

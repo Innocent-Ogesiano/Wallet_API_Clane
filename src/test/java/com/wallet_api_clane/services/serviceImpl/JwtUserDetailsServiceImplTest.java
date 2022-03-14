@@ -29,9 +29,11 @@ class JwtUserDetailsServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        user = new User();
-        user.setEmail("email");
-        user.setAccountVerified(true);
+        user = User
+                .builder()
+                .email("email")
+                .isAccountVerified(true)
+                .build();
     }
 
     @Test
