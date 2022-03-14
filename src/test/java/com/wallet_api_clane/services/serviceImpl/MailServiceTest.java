@@ -14,8 +14,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
-import javax.mail.MessagingException;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -30,7 +28,7 @@ class MailServiceTest {
     private TestRestTemplate testRestTemplate;
 
     @Test
-    void shouldSendEmailWithSpecifiedPayload() throws MessagingException {
+    void shouldSendEmailWithSpecifiedPayload() {
 
         MailDto mailDto =  new MailDto("innocentekweogu@gmail.com", "Test Mail", "This is a test Mail");
 
