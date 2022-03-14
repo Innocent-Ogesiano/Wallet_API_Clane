@@ -5,5 +5,5 @@ import com.wallet_api_clane.models.User;
 
 public interface TransactionServices {
     void saveNewTransaction(TransactionDto transactionDto);
-    double checkTransactionsForTheDay(User user);
+    double checkTotalTransactionsForTheDay(User user);
 }

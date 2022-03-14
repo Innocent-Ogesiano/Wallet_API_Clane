@@ -10,7 +10,7 @@ import com.wallet_api_clane.repositories.UserRepository;
 import com.wallet_api_clane.services.MailService;
 import com.wallet_api_clane.services.TransactionServices;
 import com.wallet_api_clane.services.WalletServices;
-import com.wallet_api_clane.utils.ResourceClass;
+import com.wallet_api_clane.utils.UserUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,7 +52,7 @@ class UserServiceImplTest {
     @Mock
     private MailService mailService;
     @Mock
-    private ResourceClass resourceClass;
+    private UserUtil userUtil;
     @Mock
     private AddressRepository addressRepository;
     @Mock
@@ -201,8 +201,8 @@ class UserServiceImplTest {
                 .accountNumber("account number")
                 .build();
         TransferDto transferDto = new TransferDto("beneficiary", 30000.00);
-        when(resourceClass.getTransactionLimit(user)).thenReturn(50000.00);
-        when(transactionServices.checkTransactionsForTheDay(user)).thenReturn(0.00);
+        when(userUtil.getTransactionLimit(user)).thenReturn(50000.00);
+        when(transactionServices.checkTotalTransactionsForTheDay(user)).thenReturn(0.00);
         when(userRepository.findUserByEmailOrAccountNumber(transferDto.getBeneficiaryEmailOrAccountNumber()))
                 .thenReturn(Optional.of(beneficiary));
         when(walletServices.topUpWallet(transferDto.getAmount(), beneficiary)).thenReturn(true);
@@ -217,8 +217,8 @@ class UserServiceImplTest {
         mockAuthenticatedUser();
         mockUser();
         TransferDto transferDto = new TransferDto("beneficiary", 60000.00);
-        when(resourceClass.getTransactionLimit(user)).thenReturn(50000.00);
-        when(transactionServices.checkTransactionsForTheDay(user)).thenReturn(0.00);
+        when(userUtil.getTransactionLimit(user)).thenReturn(50000.00);
+        when(transactionServices.checkTotalTransactionsForTheDay(user)).thenReturn(0.00);
         assertThrows(InsufficientResourcesException.class, ()->
                 userService.transferMoneyToAnotherUser(transferDto));
     }
@@ -229,8 +229,8 @@ class UserServiceImplTest {
         mockAuthenticatedUser();
         mockUser();
         TransferDto transferDto = new TransferDto("beneficiary", 20000.00);
-        when(resourceClass.getTransactionLimit(user)).thenReturn(50000.00);
-        when(transactionServices.checkTransactionsForTheDay(user)).thenReturn(40000.00);
+        when(userUtil.getTransactionLimit(user)).thenReturn(50000.00);
+        when(transactionServices.checkTotalTransactionsForTheDay(user)).thenReturn(40000.00);
         assertThrows(TransactionLimitException.class, ()->
                 userService.transferMoneyToAnotherUser(transferDto));
     }
@@ -241,8 +241,8 @@ class UserServiceImplTest {
         mockAuthenticatedUser();
         mockUser();
         TransferDto transferDto = new TransferDto("beneficiary", 0.00);
-        when(resourceClass.getTransactionLimit(user)).thenReturn(50000.00);
-        when(transactionServices.checkTransactionsForTheDay(user)).thenReturn(40000.00);
+        when(userUtil.getTransactionLimit(user)).thenReturn(50000.00);
+        when(transactionServices.checkTotalTransactionsForTheDay(user)).thenReturn(40000.00);
         assertThrows(InvalidAmountException.class, ()->
                 userService.transferMoneyToAnotherUser(transferDto));
     }
@@ -253,8 +253,8 @@ class UserServiceImplTest {
         mockAuthenticatedUser();
         mockUser();
         TransferDto transferDto = new TransferDto("beneficiary", 30000.00);
-        when(resourceClass.getTransactionLimit(user)).thenReturn(50000.00);
-        when(transactionServices.checkTransactionsForTheDay(user)).thenReturn(0.00);
+        when(userUtil.getTransactionLimit(user)).thenReturn(50000.00);
+        when(transactionServices.checkTotalTransactionsForTheDay(user)).thenReturn(0.00);
         when(userRepository.findUserByEmailOrAccountNumber(transferDto.getBeneficiaryEmailOrAccountNumber()))
                 .thenReturn(Optional.empty());
         assertThrows(UserWithEmailNotFound.class, ()->
@@ -275,8 +275,8 @@ class UserServiceImplTest {
                 .accountNumber("account number")
                 .build();
         TransferDto transferDto = new TransferDto("beneficiary", 30000.00);
-        when(resourceClass.getTransactionLimit(user)).thenReturn(50000.00);
-        when(transactionServices.checkTransactionsForTheDay(user)).thenReturn(0.00);
+        when(userUtil.getTransactionLimit(user)).thenReturn(50000.00);
+        when(transactionServices.checkTotalTransactionsForTheDay(user)).thenReturn(0.00);
         when(userRepository.findUserByEmailOrAccountNumber(transferDto.getBeneficiaryEmailOrAccountNumber()))
                 .thenReturn(Optional.of(beneficiary));
         when(walletServices.topUpWallet(transferDto.getAmount(), beneficiary)).thenReturn(false);
@@ -291,8 +291,8 @@ class UserServiceImplTest {
         mockUser();
         WithdrawalDto withdrawalDto = new WithdrawalDto(30000.00);
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-        when(resourceClass.getTransactionLimit(user)).thenReturn(50000.00);
-        when(transactionServices.checkTransactionsForTheDay(user)).thenReturn(0.00);
+        when(userUtil.getTransactionLimit(user)).thenReturn(50000.00);
+        when(transactionServices.checkTotalTransactionsForTheDay(user)).thenReturn(0.00);
         doNothing().when(walletServices).withdrawFromWallet(any(Double.class), captor.capture());
         userService.withdrawFromWallet(withdrawalDto);
         verify(walletServices, times(1))
@@ -306,8 +306,8 @@ class UserServiceImplTest {
         mockAuthenticatedUser();
         mockUser();
         WithdrawalDto withdrawalDto = new WithdrawalDto(0.00);
-        when(resourceClass.getTransactionLimit(user)).thenReturn(50000.00);
-        when(transactionServices.checkTransactionsForTheDay(user)).thenReturn(0.00);
+        when(userUtil.getTransactionLimit(user)).thenReturn(50000.00);
+        when(transactionServices.checkTotalTransactionsForTheDay(user)).thenReturn(0.00);
         assertThrows(InvalidAmountException.class, ()->
                 userService.withdrawFromWallet(withdrawalDto));
     }
@@ -318,8 +318,8 @@ class UserServiceImplTest {
         mockAuthenticatedUser();
         mockUser();
         WithdrawalDto withdrawalDto = new WithdrawalDto(10000.00);
-        when(resourceClass.getTransactionLimit(user)).thenReturn(50000.00);
-        when(transactionServices.checkTransactionsForTheDay(user)).thenReturn(50000.00);
+        when(userUtil.getTransactionLimit(user)).thenReturn(50000.00);
+        when(transactionServices.checkTotalTransactionsForTheDay(user)).thenReturn(50000.00);
         assertThrows(TransactionLimitException.class, ()->
                 userService.withdrawFromWallet(withdrawalDto));
     }
@@ -330,8 +330,8 @@ class UserServiceImplTest {
         mockAuthenticatedUser();
         mockUser();
         WithdrawalDto withdrawalDto = new WithdrawalDto(100000.00);
-        when(resourceClass.getTransactionLimit(user)).thenReturn(50000.00);
-        when(transactionServices.checkTransactionsForTheDay(user)).thenReturn(0.00);
+        when(userUtil.getTransactionLimit(user)).thenReturn(50000.00);
+        when(transactionServices.checkTotalTransactionsForTheDay(user)).thenReturn(0.00);
         assertThrows(InsufficientResourcesException.class, ()->
                 userService.withdrawFromWallet(withdrawalDto));
     }
@@ -348,7 +348,7 @@ class UserServiceImplTest {
     }
 
     private void mockUser() {
-        when(resourceClass.getUserWithEmail("og@gmail.com")).thenReturn(user);
+        when(userUtil.getUserWithEmail("og@gmail.com")).thenReturn(user);
     }
 
 }

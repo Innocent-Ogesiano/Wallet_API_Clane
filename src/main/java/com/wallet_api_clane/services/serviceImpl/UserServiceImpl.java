@@ -10,7 +10,7 @@ import com.wallet_api_clane.services.MailService;
 import com.wallet_api_clane.services.TransactionServices;
 import com.wallet_api_clane.services.UserServices;
 import com.wallet_api_clane.services.WalletServices;
-import com.wallet_api_clane.utils.ResourceClass;
+import com.wallet_api_clane.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -27,7 +27,7 @@ import static com.wallet_api_clane.enums.TransactionStatus.DECLINED;
 import static com.wallet_api_clane.enums.TransactionType.TRANSFER;
 import static com.wallet_api_clane.enums.TransactionType.WITHDRAWAL;
 import static com.wallet_api_clane.global_constants.Constants.*;
-import static com.wallet_api_clane.utils.ResourceClass.getAuthenticatedUser;
+import static com.wallet_api_clane.utils.UserUtil.getAuthenticatedUser;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserServices {
     private final WalletServices walletServices;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
-    private final ResourceClass resourceClass;
+    private final UserUtil userUtil;
     private final AddressRepository addressRepository;
     private final TransactionServices transactionServices;
 
@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserServices {
     @Override
     public void deposit(double amount) throws InvalidAmountException, InvalidTransactionException {
         String email = getAuthenticatedUser();
-        User user = resourceClass.getUserWithEmail(email);
+        User user = userUtil.getUserWithEmail(email);
         boolean status = walletServices.topUpWallet(amount, user);
         if (!status)
             throw new InvalidTransactionException("Invalid transaction, kindly upgrade your account");
@@ -64,13 +64,13 @@ public class UserServiceImpl implements UserServices {
 
     @Override
     public double checkBalance() {
-        User user = resourceClass.getUserWithEmail(getAuthenticatedUser());
+        User user = userUtil.getUserWithEmail(getAuthenticatedUser());
         return walletServices.checkWalletBalance(user);
     }
 
     @Override
     public void upgradeToLevel2(Level2Dto level2Dto) {
-        User user = resourceClass.getUserWithEmail(getAuthenticatedUser());
+        User user = userUtil.getUserWithEmail(getAuthenticatedUser());
         if (user.getKycLevel().equals(LEVEL_1)) {
             mapper.map(level2Dto, user);
             user.setKycLevel(LEVEL_2);
@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserServices {
 
     @Override
     public void upgradeToLevel3(Level3Dto level3Dto) {
-        User user = resourceClass.getUserWithEmail(getAuthenticatedUser());
+        User user = userUtil.getUserWithEmail(getAuthenticatedUser());
         if (!user.getKycLevel().equals(LEVEL_3) && user.getKycLevel().equals(LEVEL_2)) {
             Address address = mapper.map(level3Dto, Address.class);
             addressRepository.save(address);
@@ -98,11 +98,11 @@ public class UserServiceImpl implements UserServices {
 
     @Override
     public void transferMoneyToAnotherUser(TransferDto transferDto) throws InvalidAmountException, InvalidTransactionException, InsufficientResourcesException {
-        User user = resourceClass.getUserWithEmail(getAuthenticatedUser());
+        User user = userUtil.getUserWithEmail(getAuthenticatedUser());
         double walletBalance = user.getWallet().getWalletBalance();
         double transferAmount = transferDto.getAmount();
-        double transactionLimit = resourceClass.getTransactionLimit(user);
-        double transactionAmount = transactionServices.checkTransactionsForTheDay(user) + transferAmount;
+        double transactionLimit = userUtil.getTransactionLimit(user);
+        double transactionAmount = transactionServices.checkTotalTransactionsForTheDay(user) + transferAmount;
         if (!(transferAmount > 0) || !(walletBalance >= transferAmount) || !(transactionAmount <= transactionLimit)) {
             if (walletBalance < transferAmount) {
                 log.error(INSUFFICIENT_BALANCE);
@@ -149,11 +149,11 @@ public class UserServiceImpl implements UserServices {
 
     @Override
     public void withdrawFromWallet(WithdrawalDto withdrawalDto) throws InvalidAmountException, InsufficientResourcesException {
-        User user = resourceClass.getUserWithEmail(getAuthenticatedUser());
+        User user = userUtil.getUserWithEmail(getAuthenticatedUser());
         double walletBalance = user.getWallet().getWalletBalance();
         double withdrawalAmount = withdrawalDto.getWithdrawalAmount();
-        double transactionLimit = resourceClass.getTransactionLimit(user);
-        double transactionAmount = transactionServices.checkTransactionsForTheDay(user) + withdrawalDto.getWithdrawalAmount();
+        double transactionLimit = userUtil.getTransactionLimit(user);
+        double transactionAmount = transactionServices.checkTotalTransactionsForTheDay(user) + withdrawalDto.getWithdrawalAmount();
         if (!(withdrawalAmount > 0) || !(walletBalance >= withdrawalAmount) || !(transactionAmount <= transactionLimit)) {
             TransactionDto transactionDto =
                     new TransactionDto(user, withdrawalAmount, WITHDRAWAL, DECLINED);

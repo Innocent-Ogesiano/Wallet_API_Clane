@@ -6,14 +6,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransferDto {
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "Beneficiary Email/Account number required required")
     private String beneficiaryEmailOrAccountNumber;
+    @NotBlank(message = "Amount required")
     private double amount;
 }

@@ -18,7 +18,7 @@ import static com.wallet_api_clane.global_constants.Constants.USER_NOT_FOUND;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ResourceClass {
+public class UserUtil {
     private final UserRepository userRepository;
 
     public static String getAuthenticatedUser() {
@@ -45,9 +45,9 @@ public class ResourceClass {
         };
     }
 
-    public Object getBalanceLimit(User user) {
+    public double getBalanceLimit(User user) {
         return switch (user.getKycLevel()) {
-            case LEVEL_3 -> "UNLIMITED";
+            case LEVEL_3 -> Double.MAX_VALUE;
             case LEVEL_2 -> 500000.00;
             default -> 50000.00;
         };

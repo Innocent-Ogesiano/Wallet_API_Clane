@@ -8,7 +8,7 @@ import com.wallet_api_clane.repositories.UserRepository;
 import com.wallet_api_clane.repositories.WalletRepository;
 import com.wallet_api_clane.services.TransactionServices;
 import com.wallet_api_clane.services.WalletServices;
-import com.wallet_api_clane.utils.ResourceClass;
+import com.wallet_api_clane.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,7 @@ import static com.wallet_api_clane.global_constants.Constants.INVALID_AMOUNT;
 @RequiredArgsConstructor
 public class WalletServiceImpl implements WalletServices {
     private final UserRepository userRepository;
-    private final ResourceClass resourceClass;
+    private final UserUtil userUtil;
     private final WalletRepository walletRepository;
     private final TransactionServices transactionServices;
 
@@ -36,33 +36,27 @@ public class WalletServiceImpl implements WalletServices {
     @Override
     public boolean topUpWallet(double amount, User user) throws InvalidAmountException {
         if (amount > 0) {
-            Object balanceLimit = resourceClass.getBalanceLimit(user);
+            double balanceLimit = userUtil.getBalanceLimit(user);
             Wallet wallet = setUserWalletBalance(amount, user, balanceLimit);
-            if (wallet != null)
+            if (wallet != null) {
                 user.setWallet(wallet);
-            else
+                userRepository.save(user);
+                return true;
+            } else
                 return false;
-            userRepository.save(user);
-            return true;
         } else
             throw new InvalidAmountException(INVALID_AMOUNT);
     }
 
-    private Wallet setUserWalletBalance(double amount, User user, Object balanceLimit) {
-        Wallet wallet = null;
-        if (!balanceLimit.equals("UNLIMITED")) {
-            double limit = (double) balanceLimit;
-            double userBalance = user.getWallet().getWalletBalance() + amount;
-            if (userBalance <= limit) {
-                wallet = setWallet(amount, user);
-            } else {
-                TransactionDto transactionDto = new TransactionDto(user, amount, DEPOSIT, DECLINED);
-                transactionServices.saveNewTransaction(transactionDto);
-            }
+    private Wallet setUserWalletBalance(double amount, User user, double balanceLimit) {
+        double userBalance = user.getWallet().getWalletBalance() + amount;
+        if (userBalance <= balanceLimit) {
+            return setWallet(amount, user);
         } else {
-            wallet = setWallet(amount, user);
+            TransactionDto transactionDto = new TransactionDto(user, amount, DEPOSIT, DECLINED);
+            transactionServices.saveNewTransaction(transactionDto);
+            return null;
         }
-        return wallet;
     }
 
     private Wallet setWallet(double amount, User user) {

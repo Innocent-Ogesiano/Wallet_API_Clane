@@ -13,11 +13,11 @@ import javax.validation.constraints.Pattern;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Level2Dto {
-    @NotBlank
+    @NotBlank(message = "First name required")
     private String firstName;
-    @NotBlank
+    @NotBlank(message = "Last name required")
     private String lastName;
-    @NotBlank
+    @NotBlank(message = "BVN required")
     @Pattern(regexp = "^\\d{11}$", message = "Enter a valid BVN")
     private String bvn;
 }

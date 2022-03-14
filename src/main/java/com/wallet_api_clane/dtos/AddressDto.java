@@ -4,18 +4,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
 public class AddressDto {
-    @NotBlank
-    @NotNull
+    @NotBlank(message = "Address line required")
     private String addressLine;
-    @NotBlank
-    @NotNull
+    @NotBlank(message = "City required")
     private String city;
-    @NotBlank
-    @NotNull
+    @NotBlank(message = "State required")
     private String state;
 }

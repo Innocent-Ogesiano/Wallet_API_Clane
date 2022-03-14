@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.wallet_api_clane.utils.ResourceClass.createHttpResponse;
+import static com.wallet_api_clane.utils.UserUtil.createHttpResponse;
 
 @Slf4j
 @RestControllerAdvice

@@ -5,13 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 @Builder
 public class Level3Dto {
     private AddressDto address;
-    @NotBlank
-    @NotNull
+    @NotBlank(message = "BVN required")
     private String nin;
 }

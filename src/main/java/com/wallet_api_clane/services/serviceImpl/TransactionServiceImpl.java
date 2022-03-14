@@ -30,12 +30,13 @@ public class TransactionServiceImpl implements TransactionServices {
     }
 
     @Override
-    public double checkTransactionsForTheDay(User user) {
+    public double checkTotalTransactionsForTheDay(User user) {
         LocalDateTime localDateTime = LocalDate.now().atStartOfDay();
         List<Transaction> transactionList =
-                transactionRepository.findTransactionsByUserAndCreatedAtIsAfterAndStatus(user, localDateTime, APPROVED);
-
-        return transactionList.stream()
+                transactionRepository.findTransactionsByUserAndCreatedAtIsAfterAndStatus(
+                                user, localDateTime, APPROVED);
+        return transactionList
+                .stream()
                 .filter(transaction -> transaction.getType().equals(TRANSFER)
                         || transaction.getType().equals(WITHDRAWAL))
                 .mapToDouble(Transaction::getAmount).sum();

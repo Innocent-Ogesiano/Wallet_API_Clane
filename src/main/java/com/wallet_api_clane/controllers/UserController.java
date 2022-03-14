@@ -24,7 +24,7 @@ public class UserController {
     private final UserServices userServices;
 
     @PutMapping("/wallet/top-up")
-    public ResponseEntity<String> topUpWallet(@RequestParam double amount) throws InvalidAmountException, InvalidTransactionException {
+    public ResponseEntity<String> topUpWallet(@RequestParam() double amount) throws InvalidAmountException, InvalidTransactionException {
         userServices.deposit(amount);
         return new ResponseEntity<>("Deposit successful", HttpStatus.OK);
     }

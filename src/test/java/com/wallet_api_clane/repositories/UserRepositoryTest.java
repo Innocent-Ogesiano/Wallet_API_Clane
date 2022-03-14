@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -44,8 +46,27 @@ class UserRepositoryTest {
     @Test
     void findUserByEmail() {
         userRepository.save(user);
-        User returnedUser = userRepository.findUserByEmail(user.getEmail()).get();
-        assertThat(returnedUser)
+        Optional<User> returnedUser = userRepository.findUserByEmail(user.getEmail());
+        assertThat(returnedUser).isPresent();
+        assertThat(returnedUser.get())
+                .isNotNull()
+                .isEqualTo(user);
+    }
+
+    @Test
+    void findUserByEmailOrPhoneNumber() {
+        userRepository.save(user);
+        Optional<User> optionalUser = userRepository.findUserByEmailOrPhoneNumber("email@email", "");
+        assertThat(optionalUser).isPresent();
+        assertThat(optionalUser.get()).isEqualTo(user);
+    }
+
+    @Test
+    void findUserByEmailOrAccountNumber() {
+        userRepository.save(user);
+        Optional<User> optionalUser = userRepository.findUserByEmailOrAccountNumber("email@email");
+        assertThat(optionalUser).isPresent();
+        assertThat(optionalUser.get())
                 .isNotNull()
                 .isEqualTo(user);
     }

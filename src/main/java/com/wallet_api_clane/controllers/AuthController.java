@@ -54,7 +54,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/login")
-    public ResponseEntity<AuthResponseDto> createAuthenticationToken(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<AuthResponseDto> createAuthenticationToken(@Valid @RequestBody LoginDto loginDto) {
         authenticateUser(loginDto, authenticationManager);
         return generateJWTToken(loginDto);
     }
@@ -65,8 +65,12 @@ public class AuthController {
             authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken
                     (loginDto.getEmail(), loginDto.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authenticate);
-        } catch (DisabledException | BadCredentialsException e) {
+        } catch (DisabledException e) {
             log.error(e.getMessage());
+            throw new DisabledException(e.getMessage());
+        } catch (BadCredentialsException e) {
+            log.error(e.getMessage());
+            throw new BadCredentialsException(e.getMessage());
         }
 
     }

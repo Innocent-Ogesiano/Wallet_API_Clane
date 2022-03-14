@@ -8,7 +8,7 @@ import com.wallet_api_clane.repositories.UserRepository;
 import com.wallet_api_clane.services.AuthServices;
 import com.wallet_api_clane.services.UserServices;
 import com.wallet_api_clane.utils.JwtTokenUtil;
-import com.wallet_api_clane.utils.ResourceClass;
+import com.wallet_api_clane.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.Optional;
 public class AuthServiceImpl implements AuthServices {
     private final UserRepository userRepository;
     private final JwtTokenUtil jwtTokenUtil;
-    private final ResourceClass resourceClass;
+    private final UserUtil userUtil;
     private final UserServices userServices;
 
     @Override
@@ -38,7 +38,7 @@ public class AuthServiceImpl implements AuthServices {
     @Override
     public void verifyAccount(String token) {
         String email = jwtTokenUtil.getUserEmailFromToken(token);
-        User user = resourceClass.getUserWithEmail(email);
+        User user = userUtil.getUserWithEmail(email);
         user.setAccountVerified(true);
         userRepository.save(user);
     }
