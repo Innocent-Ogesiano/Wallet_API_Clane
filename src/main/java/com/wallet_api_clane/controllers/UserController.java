@@ -53,7 +53,7 @@ public class UserController {
     }
 
     @PostMapping("/withdraw")
-    public ResponseEntity<String> withdrawFromWallet(@Valid @RequestBody WithdrawalDto withdrawalDto) throws InsufficientResourcesException, InvalidAmountException {
+    public ResponseEntity<String> withdrawFromWallet(@RequestBody WithdrawalDto withdrawalDto) throws InsufficientResourcesException, InvalidAmountException {
         userServices.withdrawFromWallet(withdrawalDto);
         return new ResponseEntity<>("Withdrawal Successful", HttpStatus.OK);
     }

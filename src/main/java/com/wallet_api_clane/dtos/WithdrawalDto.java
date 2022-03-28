@@ -12,6 +12,5 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WithdrawalDto {
-    @NotBlank(message = "Withdrawal Amount required")
     private double withdrawalAmount;
 }

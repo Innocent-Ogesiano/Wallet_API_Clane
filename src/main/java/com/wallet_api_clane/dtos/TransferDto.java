@@ -13,6 +13,5 @@ import javax.validation.constraints.NotBlank;
 public class TransferDto {
     @NotBlank(message = "Beneficiary Email/Account number required required")
     private String beneficiaryEmailOrAccountNumber;
-    @NotBlank(message = "Amount required")
     private double amount;
 }
